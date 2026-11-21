@@ -124,6 +124,24 @@ const DEFS={"abide": "to put up with something", "alone": "with no one else arou
 const ROWS = 6, LEN = 5;
 const LAUNCH_DAY = Date.UTC(2026, 10, 20) / 864e5; // puzzle #1 = Nov 20, 2026
 
+// Past-tense -ED has three sounds: /t/ (baked), /d/ (cared) and "id" (wanted, after T or D).
+const NOT_PAST_ED = new Set(['bleed', 'breed', 'creed', 'greed', 'speed', 'steed', 'tweed', 'naked']); // end in -ed but aren't past tense
+const T_SED = new Set(['based', 'cased']); // -SED that says /st/ (dosed, hosed, posed say /zd/)
+function edSound(w) {
+  if (!/ed$/.test(w) || NOT_PAST_ED.has(w) || w === 'bused') return null;
+  if (/[td]ed$/.test(w)) return 'id';
+  return (/(ch|[kpxc])ed$/.test(w) || T_SED.has(w)) ? 't' : 'd';
+}
+function soundNote(rule, w) {
+  if (!rule || rule.id !== 'ed') return '';
+  const s = edSound(w);
+  if (!s) return '';
+  const ex = { t: ['baked', 'hoped', 'fixed'], d: ['loved', 'played', 'tuned'], id: ['wanted', 'added', 'voted'] }[s]
+    .filter(x => x !== w).slice(0, 2).join(' and ');
+  const say = { t: 'T', d: 'D', id: '\u201cid\u201d (after T or D)' }[s] + ', like ' + ex;
+  return 'The ED in ' + w.toUpperCase() + ' sounds like ' + say + '.';
+}
+
 const RULES = [
   { id: 'magice', name: 'Magic E', icon: '✨',
     desc: 'Ends in vowel + consonant + silent E',
@@ -158,8 +176,8 @@ const RULES = [
   { id: 'ed', name: 'Past Tense', icon: '⏪',
     desc: 'Ends in -ED (like walked, hoped)',
     ex: 'jumped · danced',
-    test: w => /ed$/.test(w),
-    fact: 'Regular verbs form the past with -ED (just -D after an E): bake → baked. It can sound like T, D or "id" — three sounds, one spelling.' },
+    test: w => /ed$/.test(w) && !NOT_PAST_ED.has(w),
+    fact: 'Regular verbs form the past with -ED (just -D after an E): bake \u2192 baked. The ending has three sounds: T after a whispery sound (baked, hoped), D after a buzzy sound or a vowel (loved, played), and \u201cid\u201d after T or D (wanted, added). One spelling, three sounds.' },
   { id: 'ck', name: 'Click-Clack', icon: '🔨',
     desc: 'Contains CK',
     ex: 'duck · jacket',
@@ -477,6 +495,7 @@ if (typeof module !== 'undefined') {
     var txt = shareFor(g);
     openModal('<h2>' + (won ? PRAISE[g.guesses.length - 1] : 'Next time!') + '</h2>' +
       '<div class="big">' + g.answer + '</div>' + (DEFS[g.answer] ? '<p style="margin-top:2px"><i>' + DEFS[g.answer] + '</i></p>' : '') +
+      (soundNote(g.rule, g.answer) ? '<p style="margin-top:2px">' + soundNote(g.rule, g.answer) + '</p>' : '') +
       (g.mode === 'practice' ? '<p>Challenge code: <b>' + g.code + '</b>. Send it to a friend and they get the same word.</p>' : '') + '<div class="fact"><b>' + g.rule.icon + ' ' + g.rule.name + '.</b> ' + g.rule.fact + '</div>' +
       '<textarea id="sh" readonly aria-label="Your result">' + txt + '</textarea>' +
       '<button class="btn" id="cp">Copy result to share</button>' +
