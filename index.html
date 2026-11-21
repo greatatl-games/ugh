@@ -11,17 +11,16 @@
 :root{
   --bg:#f6f1e7; --ink:#1d2433; --muted:#6b6f7a; --line:#d8cfbd; --card:#fffaf0;
   --accent:#d9482b; --accent-soft:#f8dccf;
-  --correct:#2f8f5b; --present:#d39b12; --absent:#767b86;
+  --correct:#2a6fd6; --present:#e0661c; --absent:#767b86;
   --key:#e4dcca; --tile-ink:#1d2433;
   --serif:'Fraunces',Georgia,'Times New Roman',serif;
   --sans:'DM Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
 }
 @media (prefers-color-scheme: dark){
   :root{ --bg:#141821; --ink:#eef0f5; --muted:#9aa0ad; --line:#3a4152; --card:#1c212d;
-    --accent:#ff7a59; --accent-soft:#3a2620; --correct:#2f9e63; --present:#b98a14;
+    --accent:#ff7a59; --accent-soft:#3a2620; --correct:#3b82e6; --present:#d9702a;
     --absent:#4a505e; --key:#343b4b; }
 }
-body.cb{ --correct:#e8702a; --present:#4a90d9; }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font-family:var(--sans);min-height:100dvh;display:flex;justify-content:center;touch-action:manipulation}
@@ -256,7 +255,7 @@ function score(guess, answer) {
 }
 
 function shareText(title, ruleName, icon, results, won) {
-  const sq = { c: '🟩', p: '🟨', a: '⬛' };
+  const sq = { c: '🟦', p: '🟧', a: '⬛' };
   const tries = won ? results.length + '/' + ROWS : 'X/' + ROWS;
   return 'Ugh! ' + title + ' ' + icon + ' ' + ruleName + ' ' + tries + '\n\n' +
     results.map(r => r.map(c => sq[c]).join('')).join('\n');
@@ -278,7 +277,6 @@ if (typeof module !== 'undefined') {
     if (s0) { store = Object.assign(store, s0); }
   } catch (e) {}
   function save() { try { localStorage.setItem('rulewords:v1', JSON.stringify(store)); } catch (e) {} }
-  if (store.cb) document.body.classList.add('cb');
 
   /* ---------- game state ---------- */
   var G, tiles = [], toastT;
@@ -460,10 +458,8 @@ if (typeof module !== 'undefined') {
       exampleRow('snake', ['', 'p', '', '', '']) + '<p style="margin-top:2px">N is in the word, but somewhere else.</p>' +
       exampleRow('globe', ['', '', 'a', '', '']) + '<p style="margin-top:2px">O isn’t in the word at all.</p>' +
       '<p>A new rule and word arrive every day at midnight.</p><p><b>Tap the 🎲 dice</b> to practice any rule. Every practice round has a <b>challenge code</b>: send it to a friend and you both get the same word. Got a code from a friend? Type it in the same place.</p>' +
-      '<label class="chk"><input type="checkbox" id="cb"' + (store.cb ? ' checked' : '') + '> Colour-blind friendly colours</label>' +
       '<button class="btn" id="go">Let’s play</button>' +
       '<p style="text-align:center;font-size:12px;color:var(--muted);margin-top:16px">by Great Atlantic Learning Games<br>© 2026 Great Atlantic Learning Systems</p>');
-    $('#cb').onchange = function (e) { store.cb = e.target.checked; document.body.classList.toggle('cb', store.cb); save(); };
     $('#go').onclick = closeModal;
     store.seen = true; save();
   }
